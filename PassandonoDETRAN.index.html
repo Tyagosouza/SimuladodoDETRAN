@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulado DETRAN Master - Cronômetro e Temas</title>
+    <style>
+        :root {
+            --primary-color: #0056b3;
+            --success-color: #28a745;
+            --error-color: #dc3545;
+            --text-color: #333;
+            --bg-color: #f4f7f6;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container {
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            padding: 25px;
+            max-width: 650px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .banner-vendas {
+            background: linear-gradient(135deg, #ff9900, #ff5500);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-decoration: none;
+            display: block;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+        .banner-vendas:hover {
+            transform: scale(1.02);
+        }
+        .header-status {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            font-weight: bold;
+            font-size: 0.95rem;
+        }
+        .tag-tema {
+            background-color: #e1ecf4;
+            color: var(--primary-color);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+        }
+        .timer-box {
+            background-color: #fff3cd;
+            color: #856404;
+            padding: 5px 12px;
+            border-radius: 6px;
+            border: 1px solid #ffeeba;
+            transition: all 0.3s;
+        }
+        .progress-bar-container {
+            background-color: #e9ecef;
+            border-radius: 10px;
+            height: 8px;
+            width: 100%;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        .progress-bar {
+            background-color: var(--primary-color);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s;
+        }
+        .question {
+            font-size: 1.15rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            line-height: 1.4;
+        }
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .option-btn {
+            background-color: #fff;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 14px 18px;
+            font-size: 1rem;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s;
+        }
+        .option-btn:hover:not(:disabled) {
+            border-color: var(--primary-color);
+            background-color: #f0f7ff;
+        }
+        .correct {
+            background-color: #d4edda !important;
+            border-color: var(--success-color) !important;
+            color: #155724;
+        }
+        .wrong {
+            background-color: #f8d7da !important;
+            border-color: var(--error-color) !important;
+            color: #721c24;
+        }
+        .footer-quiz {
+            margin-top: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            min-height: 45px;
+        }
+        .next-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: none;
+        }
+        .next-btn:hover {
+            background-color: #004085;
+        }
+        .result-container {
+            text-align: center;
+            display: none;
+        }
+        .score {
+            font-size: 1.6rem;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        .restart-btn {
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 1rem;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .restart-btn:hover {
+            background-color: #5a6268;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- 🎯 ESPAÇO PARA O SEU LINK DE VENDA -->
+        <a href="https://pay.kiwify.com.br/xxXqQYz" target="_blank" class="banner-vendas">
+            🚀 Quer Passar de Primeira sem Medo? Clique Aqui e Conheça o Método Secreto do DETRAN!
+        </a>
+
+        <!-- Tela do Simulado -->
+        <div id="quiz-screen">
+            <div class="header-status">
+                <span id="tema-tag" class="tag-tema">Tema</span>
+                <span id="timer" class="timer-box">⏱ Tempo: 00:45</span>
+            </div>
+            
+            <div class="progress-bar-container">
+                <div id="progress-bar" class="progress-bar"></div>
+            </div>
+
+            <div id="progress-text" style="margin-bottom: 10px; color: #666; font-size: 0.9rem;"></div>
+            <div id="question" class="question">Carregando pergunta...</div>
+            <div id="options" class="options-container"></div>
+            
+            <div class="footer-quiz">
+                <span id="feedback" style="font-weight: bold; font-size: 1.1rem;"></span>
+                <button id="next-button" class="next-btn" onclick="nextQuestion()">Avançar ➔</button>
+            </div>
+        </div>
+
+        <!-- Tela de Resultado -->
+        <div id="result-screen" class="result-container">
+            <h2>Simulado Concluído!</h2>
+            <div id="score-text" class="score"></div>
+            <p id="status-text" style="font-size: 1.1rem; font-weight: bold; margin-bottom: 25px;"></p>
+            
+            <!-- 🎯 SEGUNDO ESPAÇO DE VENDAS (OPORTUNIDADE PERFEITA QUANDO O ALUNO TERMINA) -->
+            <a href="https://pay.kiwify.com.br/xxXqQYz" target="_blank" class="banner-vendas" style="margin-top: 20px;">
+                📚 Garanta sua CNH: Baixe o Cronograma Completo e PDFs de Legislação com Desconto!
+            </a>
+            <br>
+            <button class="restart-btn" onclick="restartQuiz()">Refazer Simulado</button>
+        </div>
+    </div>
+
+    <script>
+        // BANCO DE QUESTÕES SEPARADAS POR TEMA
+        const questions = [
+            {
+                tema: "Legislação de Trânsito",
+                question: "Dirigir sob a influência de álcool é considerado uma infração de que natureza?",
+                options: ["Leve", "Média", "Grave", "Gravíssima"],
+                answer: 3 // Resposta correta: Gravíssima (Índice 3)
+            },
+            {
+                tema: "Direção Defensiva",
+                question: "Qual a melhor postura defensiva do condutor ao se deparar com chuva forte e pista escorregadia?",
+                options: ["Aumentar a velocidade para chegar rápido", "Reduzir a velocidade e aumentar a distância do veículo da frente", "Ligar o pisca-alerta com o carro em movimento", "Manter a velocidade máxima permitida na via"],
+                answer: 1 // Resposta correta: Reduzir a velocidade... (Índice 1)
+            },
+            {
+                tema: "Sinalização de Trânsito",
+                question: "As placas de formato octogonal e fundo vermelho pertencem ao grupo de sinalização de:",
+                options: ["Advertência", "Regulamentação", "Indicação", "Turismo"],
+                answer: 1 // Resposta correta: Regulamentação (Índice 1)
+            },
+            {
+                tema: "Primeiros Socorros",
+                question: "Ao prestar socorro a uma vítima de acidente, qual a PRIMEIRA atitude correta a ser tomada?",
+                options: ["Dar água ou alimentos para a vítima", "Movimentar o corpo da vítima imediatamente", "Sinalizar e isolar o local do acidente para evitar novos impactos", "Retirar o capacete de motociclistas caídos"],
+                answer: 2 // Resposta correta: Sinalizar e isolar... (Índice 2)
+            },
+            {
+                tema: "Meio Ambiente",
+                question: "O órgão responsável por regulamentar os limites de emissão de gases poluentes por veículos automotores é o:",
+                options: ["CONTRAN", "CONAMA", "DETRAN", "IBAMA"],
+                answer: 1 // Resposta correta: CONAMA (Índice 1)
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let answered = false;
+        let timerInterval;
+        const TIME_LIMIT = 45; // Tempo padrão por questão (em segundos)
+        let timeLeft = TIME_LIMIT;
+
+        function startQuiz() {
+            currentQuestionIndex = 0;
+            score = 0;
+            document.getElementById("quiz-screen").style.display = "block";
+            document.getElementById("result-screen").style.display = "none";
+            showQuestion();
+        }
+
+        function startTimer() {
+            clearInterval(timerInterval);
+            timeLeft = TIME_LIMIT;
+            updateTimerDisplay();
+            
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    autoTimeOut();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+const minutes = Math.floor(timeLeft / 60).toString().padStart(2, '0');const seconds = (timeLeft % 60).toString().padStart(2, '0');document.getElementById("timer").innerText = ⏱ Tempo: ${minutes}:${seconds};// Fica vermelho nos últimos 10 segundos para dar urgênciaif (timeLeft <= 10) {document.getElementById("timer").style.backgroundColor = "#f8d7da";document.getElementById("timer").style.color = "var(--error-color)";document.getElementById("timer").style.borderColor = "var(--error-color)";} else {document.getElementById("timer").style.backgroundColor = "#fff3cd";document.getElementById("timer").style.color = "#856404";document.getElementById("timer").style.borderColor = "#ffeeba";}}function showQuestion() {answered = false;document.getElementById("next-button").style.display = "none";document.getElementById("feedback").innerText = "";const currentQuestion = questions[currentQuestionIndex];// Atualiza barra de progresso visualconst progressPercent = ((currentQuestionIndex) / questions.length) * 100;document.getElementById("progress-bar").style.width = ${progressPercent}%;document.getElementById("progress-text").innerText = Questão ${currentQuestionIndex + 1} de ${questions.length};// Define o tema dinâmico e o enunciado da perguntadocument.getElementById("tema-tag").innerText = currentQuestion.tema;document.getElementById("question").innerText = currentQuestion.question;// Cria os botões das alternativasconst optionsContainer = document.getElementById("options");optionsContainer.innerHTML = "";currentQuestion.options.forEach((option, index) => {const button = document.createElement("button");button.innerText = option;button.classList.add("option-btn");button.onclick = () => selectOption(index, button);optionsContainer.appendChild(button);});startTimer();}function selectOption(selectedIndex, selectedButton) {if (answered) return;answered = true;clearInterval(timerInterval); // Para a contagem imediatamente ao clicarconst currentQuestion = questions[currentQuestionIndex];const buttons = document.querySelectorAll(".option-btn");buttons.forEach((btn) => btn.disabled = true);if (selectedIndex === currentQuestion.answer) {selectedButton.classList.add("correct");document.getElementById("feedback").innerText = "✔ Resposta Correta!";document.getElementById("feedback").style.color = "var(--success-color)";score++;} else {selectedButton.classList.add("wrong");buttons[currentQuestion.answer].classList.add("correct");document.getElementById("feedback").innerText = "✖ Resposta Errada!";document.getElementById("feedback").style.color = "var(--error-color)";}document.getElementById("next-button").style.display = "block";}function autoTimeOut() {answered = true;const currentQuestion = questions[currentQuestionIndex];const buttons = document.querySelectorAll(".option-btn");buttons.forEach((btn) => btn.disabled = true);buttons[currentQuestion.answer].classList.add("correct");document.getElementById("feedback").innerText = "⌛ O tempo esgotou!";document.getElementById("feedback").style.color = "var(--error-color)";document.getElementById("next-button").style.display = "block";}function nextQuestion() {currentQuestionIndex++;if (currentQuestionIndex < questions.length) {showQuestion();} else {showResult();}}function showResult() {clearInterval(timerInterval);document.getElementById("progress-bar").style.width = "100%";document.getElementById("quiz-screen").style.display = "none";document.getElementById("result-screen").style.display = "block";const scoreText = document.getElementById("score-text");const statusText = document.getElementById("status-text");scoreText.innerText = Você acertou ${score} de ${questions.length} questões.;const percent = (score / questions.length) * 100;if (percent >= 70) {statusText.innerText = "🎉 Aprovado! Você atingiu a meta necessária para a prova real do DETRAN.";statusText.style.color = "var(--success-color)";} else {statusText.innerText = "❌ Reprovado. É necessário acertar pelo menos 70% das perguntas.";statusText.style.color = "var(--error-color)";}}function restartQuiz() {startQuiz();}// Executa o início do jogo ao terminar de ler a páginawindow.onload = startQuiz;
