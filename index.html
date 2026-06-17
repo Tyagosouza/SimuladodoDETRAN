@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulado DETRAN - Prepare-se para a Prova</title>
+    <style>
+        :root {
+            --primary-color: #0056b3;
+            --success-color: #28a745;
+            --error-color: #dc3545;
+            --text-color: #333;
+            --bg-color: #f4f7f6;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 30px;
+            max-width: 600px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        h1 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-top: 0;
+        }
+        .banner-vendas {
+            background: linear-gradient(135deg, #ff9900, #ff5500);
+            color: white;
+            padding: 15px;
+            border-radius: 6px;
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 25px;
+            text-decoration: none;
+            display: block;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+            transition: transform 0.2s;
+        }
+        .banner-vendas:hover {
+            transform: scale(1.02);
+        }
+        .question {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .option-btn {
+            background-color: #fff;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            padding: 12px 15px;
+            font-size: 1rem;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s;
+        }
+        .option-btn:hover:not(:disabled) {
+            border-color: var(--primary-color);
+            background-color: #f0f7ff;
+        }
+        .correct {
+            background-color: #d4edda !important;
+            border-color: var(--success-color) !important;
+            color: #155724;
+        }
+        .wrong {
+            background-color: #f8d7da !important;
+            border-color: var(--error-color) !important;
+            color: #721c24;
+        }
+        .footer-quiz {
+            margin-top: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .next-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            display: none;
+        }
+        .next-btn:hover {
+            background-color: #004085;
+        }
+        .result-container {
+            text-align: center;
+            display: none;
+        }
+        .score {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        .restart-btn {
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- LINK DA SUA PLATAFORMA DE VENDAS -->
+        <a href="https://pay.kiwify.com.br/xxXqQYz" target="_blank" class="banner-vendas">
+            🚀 Quer passar de primeira? Clique aqui e conheça a Apostila Secreta do DETRAN!
+        </a>
+
+        <!-- Tela do Simulado -->
+        <div id="quiz-screen">
+            <div id="progress" style="margin-bottom: 10px; color: #666; font-size: 0.9rem;"></div>
+            <div id="question" class="question">Carregando pergunta...</div>
+            <div id="options" class="options-container"></div>
+            
+            <div class="footer-quiz">
+                <span id="feedback" style="font-weight: bold;"></span>
+                <button id="next-button" class="next-btn" onclick="nextQuestion()">Próxima</button>
+            </div>
+        </div>
+
+        <!-- Tela de Resultado -->
+        <div id="result-screen" class="result-container">
+            <h2>Simulado Concluído!</h2>
+            <div id="score-text" class="score"></div>
+            <p id="status-text"></p>
+            <button class="restart-btn" onclick="restartQuiz()">Tentar Novamente</button>
+        </div>
+    </div>
+
+    <script>
+        // BANCO DE QUESTÕES DO DETRAN
+        const questions = [
+            {
+                question: "Qual é a velocidade máxima permitida em uma via de trânsito rápido onde não houver sinalização?",
+                options: ["60 km/h", "80 km/h", "110 km/h", "40 km/h"],
+                answer: 1 // Índice da resposta correta (começa em 0, então 1 = 80 km/h)
+            },
+            {
+                question: "A carteira nacional de habilitação (CNH) com foto serve como documento de identidade?",
+                options: ["Não, serve apenas para dirigir.", "Sim, em todo o território nacional.", "Sim, apenas no estado de emissão.", "Não, o RG ainda é obrigatório."],
+                answer: 1
+            },
+            {
+                question: "Qual placa abaixo indica 'Parada Obrigatória'?",
+                options: ["Placa Redonda com fundo branco", "Placa Octogonal com fundo vermelho", "Placa Triangular", "Placa Quadrada amarela"],
+                answer: 1
+            },
+            {
+                question: "Dirigir sob a influência de álcool é uma infração de qual natureza?",
+                options: ["Média", "Grave", "Gravíssima", "Leve"],
+                answer: 2
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let answered = false;
+
+        function startQuiz() {
+            currentQuestionIndex = 0;
+            score = 0;
+            document.getElementById("quiz-screen").style.display = "block";
+            document.getElementById("result-screen").style.display = "none";
+            showQuestion();
+        }
+
+        function showQuestion() {
+            answered = false;
+            document.getElementById("next-button").style.display = "none";
+            document.getElementById("feedback").innerText = "";
+            
+            const currentQuestion = questions[currentQuestionIndex];
+            document.getElementById("progress").innerText = `Pergunta ${currentQuestionIndex + 1} de ${questions.length}`;
+            document.getElementById("question").innerText = currentQuestion.question;
+            
+            const optionsContainer = document.getElementById("options");
+            optionsContainer.innerHTML = "";
+            
+            currentQuestion.options.forEach((option, index) => {
+                const button = document.createElement("button");
+                button.innerText = option;
+                button.classList.add("option-btn");
+                button.onclick = () => selectOption(index, button);
+                optionsContainer.appendChild(button);
+            });
+        }
+
+        function selectOption(selectedIndex, selectedButton) {
+            if (answered) return;
+            answered = true;
+            
+            const currentQuestion = questions[currentQuestionIndex];
+            const buttons = document.querySelectorAll(".option-btn");
+            
+            buttons.forEach((btn) => btn.disabled = true);
+
+            if (selectedIndex === currentQuestion.answer) {
+                selectedButton.classList.add("correct");
+                document.getElementById("feedback").innerText = "✔ Correto!";
+                document.getElementById("feedback").style.color = "var(--success-color)";
+                score++;
+            } else {
+                selectedButton.classList.add("wrong");
+                buttons[currentQuestion.answer].classList.add("correct");
+                document.getElementById("feedback").innerText = "✖ Errado!";
+                document.getElementById("feedback").style.color = "var(--error-color)";
+            }
+            
+            document.getElementById("next-button").style.display = "block";
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < questions.length) {
+                showQuestion();
+            } else {
+                showResult();
+            }
+        }
+
+        function showResult() {
+            document.getElementById("quiz-screen").style.display = "none";
+            document.getElementById("result-screen").style.display = "block";
+            
+            const scoreText = document.getElementById("score-text");
+            const statusText = document.getElementById("status-text");
+            
+            scoreText.innerText = `Você acertou ${score} de ${questions.length} questões.`;
+            
+            const percent = (score / questions.length) * 100;
+            if (percent >= 70) {
+                statusText.innerText = "🎉 Parabéns! Você seria aprovado no DETRAN.";
+                statusText.style.color = "var(--success-color)";
+            } else {
+                statusText.innerText = "❌ Você precisa estudar mais um pouco. Tente novamente!";
+                statusText.style.color = "var(--error-color)";
+            }
+        }
+
+        function restartQuiz() {
+            startQuiz();
+        }
+
+        // Inicia o quiz ao carregar a página
+        window.onload = startQuiz;
+    </script>
+</body>
+</html>
