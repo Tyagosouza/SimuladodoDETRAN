@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Passando no DETRAN - Área VIP</title>
+    <style>
+        :root {
+            --primary: #0f172a;
+            --accent: #2563eb;
+            --accent-hover: #1d4ed8;
+            --success: #10b981;
+            --error: #ef4444;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text: #334155;
+            --text-light: #64748b;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary), #1e293b);
+            color: white;
+            width: 100%;
+            text-align: center;
+            padding: 35px 20px;
+            box-sizing: border-box;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 2.3rem;
+            letter-spacing: -1px;
+            font-weight: 800;
+        }
+
+        header h1 span {
+            color: #60a5fa;
+        }
+
+        header p {
+            margin: 8px 0 0 0;
+            color: #94a3b8;
+            font-size: 1.1rem;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .topic-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-top: 10px;
+        }
+
+        .topic-card {
+            background: var(--card-bg);
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 25px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);
+        }
+
+        .topic-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent);
+            box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.1);
+        }
+
+        .topic-card h3 {
+            margin: 10px 0 5px 0;
+            font-size: 1.3rem;
+            color: var(--primary);
+        }
+
+        .topic-card p {
+            margin: 0;
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        .quiz-box {
+            background: var(--card-bg);
+            border-radius: 24px;
+            padding: 35px;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05);
+            display: none;
+            position: relative;
+        }
+
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f1f5f9;
+        }
+
+        .badge {
+            background: #e0f2fe;
+            color: #0369a1;
+            padding: 6px 14px;
+            border-radius: 999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .timer {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            background: #eff6ff;
+            padding: 6px 14px;
+            border-radius: 999px;
+        }
+
+        .timer.urgent {
+            color: var(--error);
+            background: #fef2f2;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            50% { opacity: 0.5; }
+        }
+
+        .question-text {
+            font-size: 1.3rem;
+            font-weight: 700;
+            line-height: 1.5;
+            color: var(--primary);
+            margin-bottom: 25px;
+        }
+
+        .plate-image-container {
+            text-align: center;
+            margin-bottom: 25px;
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px dashed #cbd5e1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .option-item {
+            background: var(--card-bg);
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 16px 20px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s ease;
+            color: var(--text);
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .option-item:hover:not(.disabled) {
+            border-color: var(--accent);
+            background: #f8fafc;
+        }
+
+        .option-item.correct {
+            background-color: #d1fae5 !important;
+            border-color: var(--success) !important;
+            color: #065f46;
+            font-weight: 700;
+        }
+
+        .option-item.wrong {
+            background-color: #fee2e2 !important;
+            border-color: var(--error) !important;
+            color: #991b1b;
+        }
+
+        .quiz-footer {
+            margin-top: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .result-box {
+            text-align: center;
+            display: none;
+            background: var(--card-bg);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05);
+        }
+
+        .score-circle {
+            width: 130px;
+            height: 130px;
+            border-radius: 50%;
+            background: #f1f5f9;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin: 0 auto 25px auto;
+            border: 6px solid var(--accent);
+        }
+
+        .score-num {
+            font-size: 2.3rem;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        .score-label {
+            font-size: 0.8rem;
+            color: var(--text-light);
+            text-transform: uppercase;
+        }
+
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .restart-btn {
+            background-color: #e2e8f0;
+            color: var(--text);
+            border: none;
+            padding: 14px 20px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .restart-btn:hover {
+            background-color: #cbd5e1;
+        }
+    
+        /* Estilos melhorados para revisão de erros e medalhas */
+        .medal-badge {
+            font-size: 1.2rem;
+            font-weight: bold;
+            padding: 8px 16px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+        }
+        .medal-ouro { background: #fef08a; color: #a16207; border: 2px solid #eab308; }
+        .medal-prata { background: #f1f5f9; color: #475569; border: 2px solid #94a3b8; }
+        .medal-bronze { background: #ffedd5; color: #c2410c; border: 2px solid #f97316; }
+        .medal-reprovado { background: #fee2e2; color: #991b1b; border: 2px solid #ef4444; }
+
+        .review-section {
+            margin-top: 30px;
+            text-align: left;
+            border-top: 2px solid #e2e8f0;
+            padding-top: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .review-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+        .review-item {
+            background: #f8fafc;
+            border-left: 4px solid var(--error);
+            padding: 15px;
+            border-radius: 0 12px 12px 0;
+            margin-bottom: 12px;
+        }
+        .review-q { font-weight: bold; color: var(--primary); margin-bottom: 5px; }
+        .review-a { color: var(--success); font-weight: 600; }
+        .review-user { color: var(--error); text-decoration: line-through; font-size: 0.95rem; }
+
+        .topic-card.general-mode {
+            grid-column: 1 / -1;
+            background: linear-gradient(135deg, #eff6ff, #dbeafe);
+            border: 2px dashed var(--accent);
+        }
+        .topic-card.general-mode:hover {
+            background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+        }
+</style>
+</head>
+<body>
+
+    <header>
+        <h1>Simulado Oficial <span>DETRAN</span></h1>
+        <p>Área de Treinamento VIP - Modo Completo com 30 Questões Sorteadas</p>
+    </header>
+
+    <div class="container">
+        <div id="topics-screen">
+            <div class="topic-grid">
+                <div class="topic-card general-mode" onclick="startQuiz('geral')">
+                    <div style="font-size: 2.5rem;">📝</div>
+                    <h3>Simulado Geral DETRAN</h3>
+                    <p>30 questões aleatórias misturando todas as categorias da prova real</p>
+                </div>
+
+                <div class="topic-card" onclick="startQuiz('legislacao')">
+                    <div style="font-size: 2.5rem;">⚖️</div>
+                    <h3>Legislação</h3>
+                    <p>Leis, infrações e CTB</p>
+                </div>
+                <div class="topic-card" onclick="startQuiz('sinalizacao')">
+                    <div style="font-size: 2.5rem;">🛑</div>
+                    <h3>Sinalização</h3>
+                    <p>Placas e marcações viárias</p>
+                </div>
+                <div class="topic-card" onclick="startQuiz('socorros')">
+                    <div style="font-size: 2.5rem;">🚑</div>
+                    <h3>Primeiros Socorros</h3>
+                    <p>Procedimentos de emergência</p>
+                </div>
+                <div class="topic-card" onclick="startQuiz('ambiente')">
+                    <div style="font-size: 2.5rem;">🌱</div>
+                    <h3>Meio Ambiente</h3>
+                    <p>Cidadania e poluição</p>
+                </div>
+                <div class="topic-card" onclick="startQuiz('mecanica')">
+                    <div style="font-size: 2.5rem;">🔧</div>
+                    <h3>Mecânica Básica</h3>
+                    <p>Funcionamento do veículo</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="quiz-screen" class="quiz-box">
+            <div class="quiz-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; border-bottom: 2px solid #f1f5f9; padding-bottom: 15px; margin-bottom: 30px;">
+                <span id="topic-badge" class="badge">Tópico</span>
+                <span id="progress-text" style="font-weight: 600;">Pergunta 1/30</span>
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <div id="timer-box" class="timer">⏱️ <span id="timer-count">45</span>s</div>
+                    <button class="restart-btn" style="padding: 6px 14px; font-size: 0.85rem; margin: 0; background-color: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; border-radius: 99px; cursor: pointer; font-weight: 600;" onclick="confirmExit()">↩ Voltar ao Início</button>
+                </div>
+            </div>
+
+            <div id="question-text" class="question-text">Texto da Pergunta</div>
+            
+            <div id="plate-container" class="plate-image-container" style="display: none;">
+                <div id="plate-svg-holder"></div>
+            </div>
+
+            <div id="options-box" class="options-list"></div>
+
+            <div class="quiz-footer">
+                <span id="feedback-text" style="font-weight: 700; font-size: 1.1rem;"></span>
+                <button id="next-btn" class="btn" style="display: none;" onclick="nextQuestion()">Avançar ➜</button>
+            </div>
+        </div>
+
+        <div id="result-screen" class="result-box">
+            <h2>Resultado do Simulado</h2>
+            <div class="score-circle">
+                <span id="final-score" class="score-num">0</span>
+                <span id="final-label" class="score-label">Acertos</span>
+            </div>
+            
+            <div id="medal-container"></div>
+            <p id="result-status" style="font-size: 1.2rem; font-weight: 600; margin-bottom: 20px;"></p>
+            
+            <div id="review-container" class="review-section" style="display: none;">
+                <div class="review-title">📋 Revisão de Erros</div>
+                <div id="review-list"></div>
+            </div>
+
+            <div class="action-buttons">
+                <button class="restart-btn" onclick="goToHome()">Fazer Novo Simulado</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const plateSVGs = {
+            r1_pare: `<svg width="140" height="140" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><polygon points="30,5 70,5 95,30 95,70 70,95 30,95 5,70 5,30" fill="#cc0000" stroke="#ffffff" stroke-width="2"/><polygon points="31,8 69,8 92,31 92,69 69,92 31,92 8,69 8,31" fill="none" stroke="#ffffff" stroke-width="3"/><text x="50" y="59" font-family='Arial Black', sans-serif font-size="20" font-weight="900" fill="#ffffff" text-anchor="middle">PARE</text></svg>`,
+            a1a_curva: `<svg width="140" height="140" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="15" y="15" width="70" height="70" rx="5" transform="rotate(45 50 50)" fill="#ffcc00" stroke="#000000" stroke-width="2"/><path d="M 55,65 L 55,45 Q 55,35 45,35 L 35,35 M 42,27 L 32,35 L 42,43" fill="none" stroke="#000000" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+            r4a_proibido_esquerda: `<svg width="140" height="140" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="40" fill="#ffffff" stroke="#cc0000" stroke-width="8"/><path d="M 60,70 L 60,45 Q 60,35 50,35 L 40,35 M 47,27 L 35,35 L 47,43" fill="none" stroke="#000000" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><line x1="25" y1="25" x2="75" y2="75" stroke="#cc0000" stroke-width="8"/></svg>`,
+            a3a_pista_sinuosa: `<svg width="140" height="140" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="15" y="15" width="70" height="70" rx="5" transform="rotate(45 50 50)" fill="#ffcc00" stroke="#000000" stroke-width="2"/><path d="M 50,70 Q 38,58 50,50 T 50,30 M 57,37 L 50,30 L 43,37" fill="none" stroke="#000000" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+            r2_de_a_preferencia: `<svg width="140" height="140" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><polygon points="50,90 5,15 95,15" fill="#ffffff" stroke="#cc0000" stroke-width="8"/><polygon points="50,78 14,20 86,20" fill="#ffffff"/></svg>`,
+            r3_sentido_proibido: `<svg width="140" height="140" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="40" fill="#cc0000"/><rect x="20" y="42" width="60" height="16" fill="#ffffff" rx="2"/></svg>`,
+            r6a_proibido_estacionar: `<svg width="140" height="140" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="40" fill="#ffffff" stroke="#cc0000" stroke-width="8"/><text x="50" y="62" font-family='Arial Black', sans-serif font-size="42" font-weight="900" fill="#000000" text-anchor="middle">E</text><line x1="25" y1="25" x2="75" y2="75" stroke="#cc0000" stroke-width="8"/></svg>`,
+            r6c_proibido_parar_estacionar: `<svg width="140" height="140" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="40" fill="#ffffff" stroke="#cc0000" stroke-width="8"/><text x="50" y="62" font-family='Arial Black', sans-serif font-size="42" font-weight="900" fill="#000000" text-anchor="middle">E</text><line x1="25" y1="25" x2="75" y2="75" stroke="#cc0000" stroke-width="8"/><line x1="25" y1="75" x2="75" y2="25" stroke="#cc0000" stroke-width="8"/></svg>`,
+            r19_velocidade_80: `<svg width="140" height="140" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="40" fill="#ffffff" stroke="#cc0000" stroke-width="8"/><text x="50" y="55" font-family='Arial Black', sans-serif font-size="26" font-weight="900" fill="#000000" text-anchor="middle">80</text><text x="50" y="72" font-family='Arial', sans-serif font-size="10" font-weight="bold" fill="#000000" text-anchor="middle">km/h</text></svg>`,
+            r24a_sentido_obrigatorio: `<svg width="140" height="140" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="40" fill="#2563eb" stroke="#ffffff" stroke-width="2"/><path d="M 25,50 L 75,50 M 60,35 L 75,50 L 60,65" fill="none" stroke="#ffffff" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+            a1b_curva_direita: `<svg width="140" height="140" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="15" y="15" width="70" height="70" rx="5" transform="rotate(45 50 50)" fill="#ffcc00" stroke="#000000" stroke-width="2"/><path d="M 45,65 L 45,45 Q 45,35 55,35 L 65,35 M 58,27 L 68,35 L 58,43" fill="none" stroke="#000000" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+            a2a_curva_fechada_esquerda: `<svg width="140" height="140" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="15" y="15" width="70" height="70" rx="5" transform="rotate(45 50 50)" fill="#ffcc00" stroke="#000000" stroke-width="2"/><path d="M 55,65 L 55,40 L 35,40 M 43,32 L 32,40 L 43,48" fill="none" stroke="#000000" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+            a15_semaforo: `<svg width="140" height="140" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="15" y="15" width="70" height="70" rx="5" transform="rotate(45 50 50)" fill="#ffcc00" stroke="#000000" stroke-width="2"/><rect x="42" y="30" width="16" height="40" fill="#333333" rx="2"/><circle cx="50" cy="37" r="5" fill="#ef4444"/><circle cx="50" cy="50" r="5" fill="#ffcc00"/><circle cx="50" cy="63" r="5" fill="#10b981"/></svg>`,
+            a18_saliencia_lombada: `<svg width="140" height="140" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="15" y="15" width="70" height="70" rx="5" transform="rotate(45 50 50)" fill="#ffcc00" stroke="#000000" stroke-width="2"/><path d="M 25,55 L 40,55 Q 50,35 60,55 L 75,55" fill="none" stroke="#000000" stroke-width="6" stroke-linecap="round"/></svg>`,
+            r10_proibido_caminhoes: `<svg width="140" height="140" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="40" fill="#ffffff" stroke="#cc0000" stroke-width="8"/><rect x="25" y="42" width="45" height="22" fill="#000000" rx="2"/><circle cx="34" cy="64" r="6" fill="#000000"/><circle cx="60" cy="64" r="6" fill="#000000"/><rect x="52" y="32" width="18" height="20" fill="#000000"/><line x1="25" y1="25" x2="75" y2="75" stroke="#cc0000" stroke-width="8"/></svg>`,
+            r15_altura_maxima: `<svg width="140" height="140" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="40" fill="#ffffff" stroke="#cc0000" stroke-width="8"/><text x="50" y="52" font-family='Arial Black', sans-serif font-size="20" font-weight="900" fill="#000000" text-anchor="middle">4,0 m</text><polygon points="50,18 44,26 56,26" fill="#000000"/><polygon points="50,82 44,74 56,74" fill="#000000"/></svg>`,
+            a4a_curva_S_esquerda: `<svg width="140" height="140" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="15" y="15" width="70" height="70" rx="5" transform="rotate(45 50 50)" fill="#ffcc00" stroke="#000000" stroke-width="2"/><path d="M 55,68 L 55,55 Q 55,47 45,45 Q 35,43 35,35 L 35,28 M 42,35 L 35,28 L 28,35" fill="none" stroke="#000000" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+            a32b_passagem_pedestres: `<svg width="140" height="140" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="15" y="15" width="70" height="70" rx="5" transform="rotate(45 50 50)" fill="#ffcc00" stroke="#000000" stroke-width="2"/><rect x="30" y="65" width="40" height="4" fill="#000000"/><rect x="30" y="58" width="40" height="4" fill="#000000"/><circle cx="50" cy="34" r="5" fill="#000000"/><path d="M 50,40 L 50,52 L 42,60 M 50,48 L 58,60 M 44,44 L 56,44" fill="none" stroke="#000000" stroke-width="5" stroke-linecap="round"/></svg>`
+        };
+
+        const bigDatabase = {
+            legislacao: [
+                { question: "Qual é a velocidade máxima permitida em uma via de trânsito rápido onde não houver sinalização?", options: ["60 km/h", "80 km/h", "110 km/h", "40 km/h"], answer: 1 },
+                { question: "A carteira nacional de habilitação (CNH) com foto serve como documento de identidade?", options: ["Não, serve apenas para dirigir.", "Sim, em todo o território nacional.", "Sim, apenas no estado de emissão.", "Não, o RG ainda é obrigatório."], answer: 1 },
+                { question: "Dirigir sob a influência de álcool é uma infração de qual natureza?", options: ["Média", "Grave", "Gravíssima", "Leve"], answer: 2 },
+                { question: "O condutor que for pego dirigindo com a validade da CNH vencida há mais de 30 dias comete uma infração:", options: ["Média.", "Grave.", "Gravíssima.", "Leve."], answer: 2 },
+                { question: "A categoria de habilitação que permite ao condutor dirigir veículos motorizados utilizados no transporte de passageiros, cuja lotação exceda a 8 lugares (excluído o do motorista), é a:", options: ["Categoria C.", "Categoria D.", "Categoria B.", "Categoria E."], answer: 1 },
+                { question: "Qual das seguintes alternativas descreve uma infração considerada GRAVÍSSIMA segundo o CTB?", options: ["Dirigir o veículo com o braço para fora.", "Avançar o sinal vermelho do semáforo ou o de parada obrigatória.", "Deixar de atualizar o cadastro de registro do veículo.", "Usar a buzina de forma prolongada entre as 22h e as 6h."], answer: 1 },
+                { question: "As penalidades de suspensão do direito de dirigir e de cassação do documento de habilitação são aplicadas por:", options: ["Decisão exclusiva de qualquer guarda de trânsito na hora da abordagem.", "Autoridade de trânsito competente, após processo administrativo assegurando a ampla defesa.", "Apenas pelo juiz de direito da comarca do condutor.", "Pelo Ministério da Infraestrutura automaticamente."], answer: 1 },
+                { question: "Quando o condutor muda de endereço residencial, ele deve comunicar a alteração ao órgão executivo de trânsito (DETRAN) no prazo de:", options: ["Imediatamente, em até 24 hours.", "Até 30 dias.", "Não há necessidade de informar, apenas na renovação da CNH.", "Até 15 dias."], answer: 0 },
+                { question: "Usar o veículo para arremessar água ou detritos sobre os pedestres ou outros veículos constitui uma infração:", options: ["Leve e gera retenção do veículo.", "Média e gera multa.", "Grave e suspensão da CNH.", "Gravíssima e recolhimento do documento."], answer: 1 },
+                { question: "Estacionar o veículo sobre a faixa de pedestres, nas esquinas ou a menos de 5 metros do bordo do alinhamento da via transversal é uma infração:", options: ["Leve.", "Média.", "Grave.", "Gravíssima."], answer: 2 },
+                { question: "Ao se deparar com uma ambulância ou veículo de polícia com as luzes intermitentes acesas e sirene ligada, o condutor deve:", options: ["Acelerar para não atrapalhar o tráfego.", "Deixar livre a passagem pela esquerda, deslocando-se para a direita da via e parando se necessário.", "Manter o ritmo e buzinar para avisar os pedestres.", "Mudar de pista rapidamente sem sinalizar."], answer: 1 },
+                { question: "O Certificado de Licenciamento Anual (CRLV-e) é um documento:", options: ["De porte obrigatório, podendo ser apresentado em formato digital ou impresso.", "Obrigatório apenas para viagens interestaduais.", "Substituível pelo comprovante de pagamento do IPVA.", "Exigido apenas para motoristas profissionais."], answer: 0 },
+                { question: "A velocidade mínima permitida em uma via de trânsito rápido onde não existir sinalização regulamentadora é de:", options: ["30 km/h.", "40 km/h.", "50 km/h.", "60 km/h."], answer: 1 },
+                { question: "A Carteira Nacional de Habilitação (CNH) não será conferida ao condutor que, no período de 12 meses possuindo a Permissão para Dirigir (PPD), cometer uma infração de natureza:", options: ["Grave ou gravíssima, ou for reincidente em infração média.", "Média ou grave, ou for reincidente em infração leve.", "Apenas se cometer duas infrações gravíssimas.", "Qualquer infração de trânsito, inclusive de natureza leve."], answer: 0 },
+                { question: "De acordo com o Código de Trânsito Brasileiro (CTB), os pedestres têm prioridade de passagem sobre os veículos motorizados:", options: ["Apenas quando a luz amarela do semáforo estiver piscando.", "Sempre, em qualquer situação ou local da via pública.", "Nas faixas de pedestres a eles destinadas, onde não houver sinalização semafórica.", "Apenas quando estiverem atravessando em grupos de mais de três pessoas."], answer: 2 },
+                { question: "Conduzir motocicleta, motoneta ou ciclomotor sem usar o capacete de segurança com viseira ou óculos protetores é uma infração:", options: ["Grave, gerando multa e retenção da moto.", "Gravíssima, gerando multa, suspensão do direito de dirigir e recolhimento da CNH.", "Média, gerando multa e pontuação na carteira.", "Gravíssima, mas que gera apenas multa multiplicada por cinco."], answer: 1 },
+                { question: "O condutor de veículo que se recusar a submeter-se ao teste do bafômetro estará sujeito a:", options: ["Apenas uma advertência verbal da autoridade de trânsito.", "Multa (dez vezes), suspensão do direito de dirigir por 12 meses, recolhimento da CNH e retenção do veículo.", "Multa simples e perda de 5 pontos na carteira de habilitação.", "Prisão em flagrante obrigatória, mesmo sem apresentar sinais de embriaguez."], answer: 1 },
+                { question: "A prioridade de trânsito dos veículos de socorro de incêndio e salvamento, de polícia e de ambulâncias:", options: ["Existe sempre, mesmo que eles não estejam em serviço de urgência.", "É válida apenas se estiverem trafegando em rodovias federais ou estaduais.", "Depende da autorização por escrito emitida pelo DETRAN local.", "É assegurada quando devidamente identificados por dispositivos regulamentares de alarme sonoro e iluminação vermelha intermitente, em serviço de urgência."], answer: 3 },
+                { question: "Transitar com o veículo em ciclovias ou ciclofaixas é considerada uma infração de que natureza?", options: ["Média.", "Grave.", "Gravíssima (com multa multiplicada por 3).", "Leve."], answer: 2 },
+                { question: "Segundo o Código de Trânsito Brasileiro, a velocidade máxima permitida em vias arteriais onde não houver sinalização regulamentadora é de:", options: ["40 km/h.", "60 km/h.", "80 km/h.", "110 km/h."], answer: 1 },
+                { question: "As crianças com idade inferior a 10 anos que não tenham atingido 1,45m de altura devem ser transportadas:", options: ["No banco dianteiro, desde que usem o cinto de segurança comum de três pontos.", "No banco traseiro, utilizando dispositivo de retenção adequado à sua idade e peso.", "Em qualquer banco do veículo, sob o colo de um adulto.", "No banco traseiro, sendo permitido o transporte no colo em baixa velocidade."], answer: 1 },
+                { question: "Parar o veículo sobre a faixa de pedestres na mudança de sinal luminoso (semáforo) é uma infração de natureza:", options: ["Leve.", "Média.", "Grave.", "Gravíssima."], answer: 1 },
+                { question: "De acordo com o CTB, qual das seguintes condutas é classificada como crime de trânsito?", options: ["Dirigir o veículo sem portar o documento de licenciamento anual (CRLV).", "Conduzir veículo automotor com capacidade psicomotora alterada em razão da influência de álcool.", "Estacionar o veículo em local proibido pela sinalização.", "Efetuar conversão à esquerda em local proibido pela placa de regulamentação."], answer: 1 },
+                { question: "Qual das seguintes alternativas representa uma causa para a CASSAÇÃO do documento de habilitação (CNH)?", options: ["Conduzir o veículo com o braço para fora ou usando calçado inadequado.", "Mudar de endereço e deixar de comunicação o DETRAN no prazo legal.", "Dirigir o veículo estando com o direito de dirigir suspenso.", "Estacionar o veículo na contramão de direção ou sobre o passeio."], answer: 2 },
+                { question: "Ao aproximar-se de um cruzamento sem sinalização por placas ou semáforo, a preferência de passagem será:", options: ["Do veículo que estiver desenvolvendo maior velocidade.", "Do veículo que vier da direita do condutor.", "Do veículo que estiver transitando pela avenida mais larga.", "Do veículo que piscar os faróis ou buzinar primeiro."], answer: 1 },
+                { question: "Fazer uso de facho de luz alta dos faróis em vias providas de iluminação pública constitui uma infração:", options: ["Leve.", "Média.", "Grave.", "Gravíssima."], answer: 0 },
+                { question: "O órgão máximo normativo, consultivo e coordenador do Sistema Nacional de Trânsito, com sede no Distrito Federal, é o:", options: ["DETRAN.", "CONTRAN.", "CONTRANDFE.", "CIRETRAN."], answer: 1 },
+                { question: "Transitar em velocidade superior à máxima permitida para o local em mais de 50% é uma infração:", options: ["Grave, gerando apenas multa.", "Gravíssima, que gera multa (3x), suspensão imediata do direito de dirigir e recolhimento da CNH.", "Média, gerando retenção do veículo.", "Gravíssima, mas que gera apenas pontuação comum na carteira."], answer: 1 },
+                { question: "A placa de sinalização de trânsito que tem caráter imperativo, indicando obrigações, limitações ou proibições, pertence ao grupo de:", options: ["Sinalização de Advertência.", "Sinalização de Indicação.", "Sinalização de Regulamentação.", "Sinalização Educativa."], answer: 2 },
+                { question: "O condutor que estiver com a Permissão para Dirigir (PPD) poderá conduzir seu veículo em quais tipos de via?", options: ["Apenas em vias urbanas locais e coletoras, sendo proibido em rodovias.", "Apenas no município onde realizou os exames práticos de habilitação.", "Em todas as vias públicas abertas ao trânsito, em todo o território nacional.", "Apenas acompanhado por um condutor habilitado há mais de dois anos."], answer: 2 }
+            ],
+            sinalizacao: [
+                { question: "Qual placa indica 'Parada Obrigatória'?", options: ["Placa Redonda com fundo branco", "Placa Octogonal com fundo vermelho", "Placa Triangular", "Placa Quadrada amarela"], answer: 1 },
+                { question: "Qual o significado desta placa de regulamentação?", svgKey: "r1_pare", options: ["Parada obrigatória à frente", "Passagem obrigatória", "Parada obrigatória", "Alfândega"], answer: 2 },
+                { question: "Esta placa de advertência alerta o condutor para o quê?", svgKey: "a1a_curva", options: ["Curva acentuada à esquerda", "Pista sinuosa à direita", "Curva à esquerda", "Estreitamento de pista à esquerda"], answer: 0 },
+                { question: "O que determina esta placa de regulamentação?", svgKey: "r4a_proibido_esquerda", options: ["Vire à esquerda", "Proibido retornar", "Proibido virar à esquerda", "Passagem proibida"], answer: 2 },
+                { question: "Esta placa alerta para a existência de:", svgKey: "a3a_pista_sinuosa", options: ["Pista sinuosa à esquerda", "Curva acentuada em S", "Pista escorregadia", "Estreitamento de pista"], answer: 0 },
+                { question: "Ao avistar esta placa de regulamentação, qual deve ser a conduta do condutor?", svgKey: "r2_de_a_preferencia", options: ["Parar o veículo obrigatoriamente.", "Dar preferência aos veículos que circulam pela via transversal.", "Acelerar para cruzar a via rápido.", "Seguir em frente, a preferência é sua."], answer: 1 },
+                { question: "Qual o significado desta placa com fundo totalmente vermelho?", svgKey: "r3_sentido_proibido", options: ["Proibido parar e estacionar.", "Sentido proibido de circulação na via.", "Entrada permitida apenas para caminhões.", "Fim de pista dupla."], answer: 1 },
+                { question: "A placa com uma tarja vermelha sobre a letra 'E' indica:", svgKey: "r6a_proibido_estacionar", options: ["Estacionamento regulamentado.", "Proibido parar e estacionar.", "Proibido estacionar, permitida a parada rápida para embarque/desembarque.", "Carga e descarga obrigatória."], answer: 2 },
+                { question: "A sinalização que proíbe tanto a imobilização prolongada quanto a rápida é:", svgKey: "r6c_proibido_parar_estacionar", options: ["Proibido estacionar.", "Proibido parar e estacionar.", "Estacionamento proibido apenas para ônibus.", "Fiscalização eletrônica."], answer: 1 },
+                { question: "O limite máximo de velocidade regulamentado por esta placa significa que:", svgKey: "r19_velocidade_80", options: ["O condutor deve trafegar a 80 km/h o tempo todo.", "É a velocidade máxima permitida, sendo infração transitar acima deste limite.", "Velocidade recomendada apenas para chuva.", "Velocidade mínima exigida."], answer: 1 },
+                { question: "Qual a indicação desta placa com uma seta apontando para a direita?", svgKey: "r24a_sentido_obrigatorio", options: ["Passagem obrigatória à direita.", "Vire à direita.", "Sentido de circulação da via/pista obrigatório para a direita.", "Conserve-se à direita."], answer: 2 },
+                { question: "Esta placa de advertência amarela avisa sobre uma:", svgKey: "a1b_curva_direita", options: ["Curva acentuada à direita.", "Curva à direita.", "Pista sinuosa à direita.", "Entrada à direita."], answer: 1 },
+                { question: "Qual perigo à frente é alertado por esta placa?", svgKey: "a2a_curva_fechada_esquerda", options: ["Curva acentuada à esquerda.", "Curva à esquerda.", "Bifurcação em Y.", "Pista escorregadia."], answer: 0 },
+                { question: "Ao visualizar esta sinalização de advertência, o condutor deve saber que encontrará:", svgKey: "a15_semaforo", options: ["Uma linha férrea.", "Um cruzamento com sinalização semafórica.", "Uma área de obras.", "Um posto policial."], answer: 1 },
+                { question: "Esta placa amarela com uma ondulação no centro indica a existência de:", svgKey: "a18_saliencia_lombada", options: ["Pista irregular.", "Depressão na via.", "Saliência ou lombada (quebra-molas).", "Declive acentuado."], answer: 2 },
+                { question: "As placas de sinalização de forma quadrada, cor amarela e preta têm a finalidade de:", options: ["Impor proibições ou restrições aos motoristas sob pena de multa.", "Indicar serviços auxiliares como postos de gasolina.", "Advertir os condutores sobre situações potencialmente perigosas na via.", "Orientar caminhos, destinos e distâncias."], answer: 2 },
+                { question: "As marcas pintadas no asfalto fazem parte da sinalização:", options: ["Vertical.", "Dispositivos auxiliares.", "Horizontal.", "Semafórica."], answer: 2 },
+                { question: "Uma linha contínua amarela pintada no centro de uma pista de mão dupla indica que:", options: ["A ultrapassagem é permitida para os dois sentidos.", "A via é de sentido único.", "É proibido ultrapassar para ambos os sentidos de fluxo.", "Há um quebra-molas à frente."], answer: 2 },
+                { question: "Qual a cor predominante das placas de sinalização de Indicação de Atrativos Turísticos?", options: ["Verde.", "Marrom.", "Azul.", "Branca."], answer: 1 },
+                { question: "As ordens do agente de trânsito expressas por meio de silvos de apito e gestos:", options: ["Têm valor secundário e perdem para os semáforos.", "Prevalecem sobre as regras de circulação e as indicações de outros sinais.", "São válidas apenas se confirmadas por placa.", "Devem ser obedecidas somente por motoristas de caminhão."], answer: 1 },
+                { question: "O tráfego de qual tipo de veículo é proibido ao avistar esta sinalização?", svgKey: "r10_proibido_caminhoes", options: ["Veículos de tração animal.", "Automóveis de passeio.", "Veículos de carga pesada (caminhões).", "Motocicletas."], answer: 2 },
+                { question: "Esta placa de regulamentação estabelece como restrição o limite máximo de:", svgKey: "r15_altura_maxima", options: ["Largura permitida.", "Altura livre máxima permitida para o trânsito de veículos.", "Peso bruto por eixo.", "Comprimento do veículo."], answer: 1 },
+                { question: "Qual o perigo indicado por esta placa de advertência amarela?", svgKey: "a4a_curva_S_esquerda", options: ["Curva acentuada em 'S' à esquerda.", "Pista sinuosa à direita.", "Entroncamento oblíquo.", "Pista escorregadia à frente."], answer: 0 },
+                { question: "Esta sinalização amarela alerta o condutor para a proximidade de:", svgKey: "a32b_passagem_pedestres", options: ["Uma área escolar com crianças.", "Uma faixa de travessagem protegida de pedestres à frente.", "Um cruzamento de vias urbanas.", "Uma área de obras na calçada."], answer: 1 },
+                { question: "As placas que indicam a localização de serviços como hospitais, hotéis, restaurantes e postos de combustível pertencem ao grupo de placas de:", options: ["Regulamentação.", "Advertência.", "Serviços Auxiliares (Indicação).", "Sinalização Educativa."], answer: 2 },
+                { question: "A linha tracejada ou seccionada pintada no centro da pista indica que:", options: ["A pista é de sentido único de circulação.", "É proibido mudar de faixa de rolamento.", "É permitido efetuar manobras de ultrapassagem em ambos os sentidos com segurança.", "Existe um posto fiscal logo adiante."], answer: 2 },
+                { question: "Qual a cor principal de fundo das placas utilizadas para sinalizar Obras na pista?", options: ["Amarela.", "Laranja.", "Branca.", "Vermelha."], answer: 1 },
+                { question: "As placas de formato retangular, fundo azul ou verde, que trazem nomes de cidades, distâncias e direções são classificadas como placas de:", options: ["Orientação e Destino (Indicação).", "Advertência de Perigo.", "Regulamentação Imperativa.", "Atrativos Turísticos."], answer: 0 },
+                { question: "As marcas delimitadoras de parada ou estacionamento pintadas na cor azul no asfalto servem para indicar vagas exclusivas para:", options: ["Caminhões de carga e descarga.", "Veículos oficiais de polícia e bombeiros.", "Pessoas com deficiência (PCD) ou idosos.", "Motos e ciclomotores."], answer: 2 },
+                { question: "Quando o semáforo apresenta a luz amarela contínua acesa, a atitude correta e segura do condutor deve ser:", options: ["Acelerar ao máximo para conseguir cruzar a via antes do sinal ficar vermelho.", "Buzinar para avisar os pedestres e manter a mesma velocidade.", "Parar o veículo, a menos que já esteja muito próximo do cruzamento e a paragem brusca cause risco de colisão traseira.", "Mudar de faixa de rodagem rapidamente."], answer: 2 }
+            ],
+            socorros: [
+                { question: "Qual das seguintes atitudes é considerada uma regra básica de Primeiros Socorros em caso de acidente?", options: ["Movimentar as vítimas imediatamente.", "Dar água ou alimentos para os feridos.", "Sinalizar o local do acidente e chamar o socorro médico.", "Retirar o capacete de um motociclista acidentado."], answer: 2 },
+                { question: "Qual a primeira atitude correta a ser tomada ao presenciar um acidente?", options: ["Remover as vítimas imediatamente.", "Sinalizar o local adequadamente e chamar o socorro.", "Oferecer água.", "Mover os carros."], answer: 1 },
+                { question: "Não se deve movimentar uma vítima de acidente com suspeita de fratura na coluna porque:", options: ["Pode causar paralisia definitiva.", "Aumenta a dor apenas.", "Causa hemorragia externa.", "Não há restrições, pode mover."], answer: 0 },
+                { question: "O telefone correto usado para acionar o Corpo de Bombeiros é:", options: ["190", "191", "192", "193"], answer: 3 },
+                { question: "Ao prestar socorro a uma vítima de acidente que apresenta sangramento abundante, o procedimento inicial correto é:", options: ["Aplicar um torniquete bem apertado usando um arame.", "Fazer compressão direta sobre a ferida usando um pano limpo ou gaze.", "Lavar o ferimento com água corrente e sabão em pó.", "Jogar álcool diretamente sobre o sangramento para esterilizar."], answer: 1 },
+                { question: "Em um acidente de trânsito, o cinto de segurança reduz o risco de lesões graves porque:", options: ["Impede que os ocupantes colidam contra as partes internas do veículo ou sejam arremessados para fora.", "Amortece o impacto desacelerando o motor do carro.", "Protege o motorista de estilhaços de vidro vindos de trás.", "Desliga o sistema elétrico do veículo automaticamente."], answer: 0 },
+                { question: "A omissão de socorro em acidentes de trânsito, quando é possível prestar auxílio sem risco pessoal, é considerada:", options: ["Apenas uma atitude antiética, sem consequências legais.", "Infração média sujeita a advertência verbal.", "Crime previsto pelo Código de Trânsito Brasileiro e pelo Código Penal.", "Permitida se o motorista estiver atrasado para o trabalho."], answer: 2 },
+                { question: "Caso uma vítima de acidente esteja consciente e reclame de muita sede, o socorrista deve:", options: ["Dar água bem gelada em grandes goles.", "Oferecer um refrigerante ou suco açucarado para dar energia.", "Não oferecer líquidos ou alimentos, mantendo a vítima em jejum até a chegada do socorro médico.", "Dar um analgésico diluído em um copo de água."], answer: 2 },
+                { question: "Ao sinalizar o local de um acidente ocorrido à noite ou sob chuva intensa, a distância para início da sinalização deve ser:", options: ["A mesma distância adotada para um dia claro.", "Dobrada em relação à distância recomendada para condições normais.", "Reduzida pela metade para que os motoristas vejam o carro mais rápido.", "Fixa em exatamente 10 metros em qualquer tipo de via."], answer: 1 },
+                { question: "Qual o número de telefone correto do SAMU (Serviço de Atendimento Móvel de Urgência)?", options: ["190", "191", "192", "193"], answer: 2 },
+                { question: "Se uma vítima de acidente de moto estiver caída no asfalto respirando, a conduta correta do socorrista leigo é:", options: ["Retirar o capacete imediatamente para melhorar a entrada de ar.", "Sentar a vítima na calçada para acalmá-la.", "Não retirar o capacete e aguardar o socorro médico especializado imobilizando a cabeça da vítima.", "Virar a vítima de bruços para evitar engasgos."], answer: 2 },
+                { question: "O sinal de trânsito que indica parada obrigatória exige que o motorista pare o veículo. Em caso de acidente próximo, a sinalização de emergência serve para:", options: ["Apenas enfeitar a pista temporariamente.", "Alertar os outros motoristas a tempo de reduzirem a velocidade e evitarem novas colisões.", "Garantir que o socorrista não seja multado por parar na via.", "Bloquear totalmente o tráfego por conta própria sem aviso."], answer: 1 },
+                { question: "Diante de uma vítima em estado de choque (pele fria, pálida, pulsação rápida e fraca), o procedimento correto é:", options: ["Manter a vítima deitada, aquecê-la levemente com uma manta e monitorar seus sinais vitais.", "Dar um susto na vítima para fazê-la reagir.", "Fazer a vítima caminhar para ativar a circulação sanguínea.", "Oferecer café quente ou bebida alcoólica para aquecer."], answer: 0 },
+                { question: "O uso de técnicas de primeiros socorros por um condutor comum serve para:", options: ["Substituir completamente o tratamento e exames que seriam feitos no hospital.", "Garantir o suporte básico de vida e evitar o agravamento das lesões até a chegada de médicos.", "Realizar procedimentos cirúrgicos de emergência na pista.", "Apenas cumprir uma obrigação sem impacto real na sobrevivência da vítima."], answer: 1 },
+                { question: "Quando há suspeita de lesão na região do pescoço ou coluna, o maior perigo de movimentar a vítima incorretamente é causar:", options: ["Uma cicatriz permanente na pele.", "Danos irreversíveis à medula espinhal, provocando paralisia (tetraplegia ou paraplegia).", "Um desmaio passageiro devido ao susto.", "Uma fratura simples no braço."], answer: 1 },
+                { question: "Ao encontrar um fio de alta tensão caído sobre o veículo acidentado com pessoas dentro, a orientação correta é:", options: ["Pedir para todos saírem do carro imediatamente.", "Remover o fio usando as próprias mãos sem proteção.", "Instruir os ocupantes a permanecerem dentro do veículo e acionar a concessionária de energia e os bombeiros.", "Jogar água no fio para tentar apagar possíveis faíscas."], answer: 2 },
+                { question: "Qual das seguintes substâncias NÃO deve ser aplicada em uma queimadura provocada por acidente de trânsito?", options: ["Água fria corrente.", "Compressa limpa e úmida.", "Pasta de dente, manteiga, pó de café ou pomadas caseiras.", "Gaze esterilizada úmida."], answer: 2 },
+                { question: "Um acidente grave em uma curva com pista molhada exige atenção na sinalização. O uso do triângulo de segurança deve ser complementado com galhos de árvores colocando-os:", options: ["Exatamente embaixo do para-choque do carro batido.", "Antes da curva, garantindo que os motoristas vejam o aviso antes de entrarem nela.", "Apenas na calçada lateral longe da pista.", "No teto do próprio veículo acidentado."], answer: 1 },
+                { question: "O pulso de uma pessoa em situação de emergência serve para avaliar qual função vital?", options: ["A função respiratória.", "A função digestiva.", "A função cardiovascular (circulação sanguínea).", "A função neurológica."], answer: 2 },
+                { question: "Em caso de parada cardiorrespiratória comprovada, a massagem cardíaca de emergência deve ser aplicada pressionando:", options: ["O abdômen inferior próximo ao umbigo.", "O centro do peito (osso esterno) com os braços esticados e as mãos sobrepostas.", "A lateral esquerda das costelas com força máxima.", "A região da garganta para liberar as vias aéreas."], answer: 1 },
+                { question: "Uma vítima de acidente de trânsito está inconsciente, mas respira normalmente. A posição de segurança indicada para mantê-la enquanto aguarda o resgate é:", options: ["Deitada de bruços com as pernas dobradas.", "Sentada com a cabeça inclinada para a frente.", "Deitada de lado (posição lateral de segurança) para evitar obstrução das vias aéreas por secreções ou vômito.", "Suspensa pelos pés para ativar o cérebro."], answer: 2 },
+                { question: "Para evitar riscos de contaminação por doenças transmissíveis através do sangue ao prestar primeiros socorros, o socorrista deve:", options: ["Evitar o contato direto com fluidos biológicos usando luvas de proteção ou sacos plásticos nas mãos.", "Lavar as mãos com gasolina antes do procedimento.", "Apenas soprar o ferimento de longe sem tocar.", "Não prestar socorro em nenhuma situação."], answer: 0 },
+                { question: "O estresse excessivo e o pânico em um cenário de acidente podem ser controlled pelo socorrista através de:", options: ["Gritar mais alto que as vítimas para indicar ordem.", "Manter a calma, agir com segurança e passar instruções claras e tranquilizadoras aos envolvidos.", "Abandonar o local para não se estressar.", "Sacudir as vítimas para que elas parem de chorar."], answer: 1 },
+                { question: "Um objeto (como um pedaço de ferro ou vidro) cravado no corpo de uma vítima de acidente NUNCA deve ser removido pelo socorrista leigo porque:", options: ["Pode quebrar o objeto dentro do corpo.", "A remoção pode provocar uma hemorragia gravíssima e incontrolável.", "O objeto pode ser usado como prova pela polícia depois.", "Não causa nenhum problema, o objeto deve ser retirado na hora."], answer: 1 },
+                { question: "A verificação da respiração de uma vítima inconsciente pode ser feita visualmente observando:", options: ["O movimento de subida e descida do peito e abdômen.", "A cor dos sapatos da vítima.", "Se os olhos da vítima estão piscando.", "A dilatação das veias das pernas."], answer: 0 },
+                { question: "O isolamento e a evacuação da área de um acidente com vazamento de produtos químicos inflamáveis servem para:", options: ["Evitar que pessoas tirem fotos do ocorrido.", "Prevenir explosões, incêndios em cadeia e intoxicações em massa de curiosos e motoristas.", "Agilizar a cobrança do seguro dos carros batidos.", "Apenas cumprir protocolo sem risco real de fogo."], answer: 1 },
+                { question: "Se houver mais de uma vítima em um acidente, o socorrista deve priorizar o atendimento àquela que:", options: ["Estiver gritando mais alto devido a dores na perna.", "Apresentar ferimentos leves visíveis no rosto.", "Estiver inconsciente e com dificuldade severa de respirar ou hemorragia abundante.", "Estiver sentada reclamando de tontura."], answer: 2 },
+                { question: "Ao ligar para os serviços de emergência (192 ou 193), a informação mais importante que você deve passar com clareza é:", options: ["O modelo e o ano exato de fabricação dos carros envolvidos.", "O endereço correto com pontos de referência, a gravidade da situação e o número estimado de vítimas.", "O seu nome completo e o seu histórico de motorista.", "A sua opinião pessoal sobre quem causou a batida."], answer: 1 },
+                { question: "Em caso de entorse ou suspeita de luxação em um braço devido ao impacto do acidente, o socorrista deve:", options: ["Puxar o osso com força para tentar colocá-lo de volta no lugar.", "Imobilizar o membro na posição em que ele se encontra usando uma tipoia improvisada ou tala dobrável.", "Fazer massagem vigorosa com pomada quente sobre a articulação.", "Forçar a vítima a dobrar o braço repetidas vezes."], answer: 1 },
+                { question: "Prestar os primeiros socorros de forma incorreta ou sem os devidos cuidados mínimos pode resultar em:", options: ["Processo de aprovação automática da CNH do motorista.", "Melhoria rápida do quadro de saúde geral dos acidentados.", "Agravamento das lesões, sequelas permanentes ou morte evitável da vítima.", "Apenas perda de tempo sem impacto real."], answer: 2 }
+            ],
+            ambiente: [
+                { question: "O descarte inadequado de óleo lubrificante usado de motor no solo ou na rede de esgoto causa qual impacto ambiental?", options: ["Nenhum, pois o óleo se dissolve e evapora naturalmente.", "Contaminação grave do solo, das águas superficiais e dos lençóis freáticos.", "Apenas poluição visual nas ruas e calçadas.", "Melhora a fertilidade da terra para plantações."], answer: 1 },
+                { question: "Qual o gás altamente tóxico, inodoro e letal emitido pela queima incompleta de combustível em motores a combustão?", options: ["Oxigênio.", "Gás Carbônico (CO2).", "Monóxido de Carbono (CO).", "Nitrogênio."], answer: 2 },
+                { question: "A poluição sonora nas grandes cidades é gerada principalmente por qual das seguintes condutas no trânsito?", options: ["Pelo barulho natural do vento nas janelas.", "Por sistemas de escapamento defeituosos, adulterados ou uso indevido da buzina.", "Pelo uso de bicicletas elétricas nas ciclovias.", "Pelo funcionamento do sistema de ar condicionado dos carros."], answer: 1 },
+                { question: "O que do condutor deve fazer com o lixo produzido dentro do seu veículo durante uma viagem?", options: ["Atirar pela janela em rodovias, pois a poeira encobre o lixo.", "Guardar dentro de um saco plástico e descartar em local apropriado (lixeira).", "Jogar no acostamento apenas se for material orgânico (como cascas de frutas).", "Acumular no banco traseiro e deixar em qualquer posto de combustível sem ensacar."], answer: 1 },
+                { question: "Atirar do veículo ou abandonar na via objetos ou substâncias constitui uma infração de trânsito de natureza:", options: ["Leve.", "Média.", "Grave.", "Gravíssima."], answer: 1 },
+                { question: "Qual o componente do veículo feito de cerâmica que tem a função de reduzir a emissão de gases poluentes através de reações químicas?", options: ["Radiador.", "Catalisador.", "Silenciador.", "Carburador."], answer: 1 },
+                { question: "O uso prolongado e desnecessário da buzina, principalmente entre as 22 horas e as 6 horas, é considerado:", options: ["Uma infração leve e poluição sonora.", "Uma demonstração de direção defensiva eficiente.", "Permitido em qualquer situação de tráfego lento.", "Infração grave com retenção do veículo."], answer: 0 },
+                { question: "O trânsito de veículos automotores contribui fortemente para o efeito estufa global devido à emissão de:", options: ["Vapor de água pura.", "Dióxido de Carbono (CO2) e outros gases poluentes.", "Gás Hélio.", "Gás Ozônio medicinal."], answer: 1 },
+                { question: "A inspeção técnica veicular periódica para emissão de gases e ruídos tem como principal objetivo:", options: ["Aumentar a arrecadação de impostos do município.", "Garantir que os veículos circulem dentro dos padrões ambientais permitidos por lei.", "Obrigar os motoristas a comprarem carros novos.", "Testar a velocidade máxima de fábrica do motor."], answer: 1 },
+                { question: "A poluição visual nas vias públicas urbanas, provocada por excesso de cartazes, outdoors e propagandas digitais nas esquinas, afeta o trânsito porque:", options: ["Desgasta a pintura asfáltica da rua.", "Desvia a atenção de motoristas e pedestres, aumentando o risco de acidentes.", "Reduz a potência elétrica dos semáforos.", "Valoriza excessivamente os imóveis comerciais."], answer: 1 },
+                { question: "Qual tipo de combustível é considerado menos poluente para a atmosfera entre os mais comuns usados no Brasil?", options: ["Óleo Diesel comum.", "Gasolina Aditivada.", "Etanol (Álcool).", "Gasolina Comum."], answer: 2 },
+                { question: "A chuva ácida, que destrói florestas e corrói monumentos históricos, é provocada pela reação química na atmosfera de gases poluentes vindos de:", options: ["Queima de lixo orgânico residencial apenas.", "Emissões industriais e da queima de combustíveis fósseis por veículos.", "Evaporação natural de rios poluídos.", "Uso excessivo de aparelhos de ar condicionado."], answer: 1 },
+                { question: "O mau estado de conservação dos pneus do veículo afeta o meio ambiente porque:", options: ["Provoca maior emissão de fumaça preta pelo escapamento.", "Causa maior desgaste do asfalto, além de gerar descarte prematuro e poluição por microplásticos.", "Altera o funcionamento do rádio do carro.", "Diminui o nível de óleo do motor."], answer: 1 },
+                { question: "As pastilhas e lonas de freio dos veículos, ao serem gastas pelo uso, liberam poeira de compostos químicos que causam poluição do:", options: ["Ar e do solo.", "Apenas do sistema elétrico.", "Apenas da água do radiador.", "Do interior do tanque de combustível."], answer: 0 },
+                { question: "O condutor que mantém o motor do veículo regulado e faz trocas de óleo e filtros nos prazos corretos está:", options: ["Apenas gastando dinheiro desnecessariamente.", "Contribuindo para a redução da poluição ambiental e economizando combustível.", "Aumentando a emissão de gases tóxicos na atmosfera.", "Prejudicando o desempenho original do carro."], answer: 1 },
+                { question: "Conduzir o veículo produzir fumaça, gases ou partículas em níveis superiores aos fixados pelo CONTRAN é uma infração:", options: ["Média.", "Grave.", "Gravíssima.", "Leve."], answer: 1 },
+                { question: "A cidadania no trânsito se manifesta quando o condutor adota qual das seguintes posturas?", options: ["Prioriza os seus próprios interesses para chegar mais rápido.", "Respeita as leis de trânsito e exibe tolerância e cortesia com os pedestres e outros motoristas.", "Usa a buzina com frequência para apressar os idosos na faixa.", "Ignora ciclistas nas vias por achar que eles atrapalham o tráfego."], answer: 1 },
+                { question: "O descarte de baterias de veículos comuns na natureza é perigoso porque elas contêm em seu interior substâncias altamente tóxicas como:", options: ["Apenas água destilada e sal.", "Metais pesados (como o chumbo) e soluções ácidas corrosivas.", "Apenas ferro fundido e plástico reciclável.", "Gás oxigênio comprimido."], answer: 1 },
+                { question: "Fazer manutenção preventiva no sistema de escapamento e silencioso do carro serve para evitar principalmente qual tipo de poluição?", options: ["Poluição da água.", "Poluição sonora e emissão excessiva de gases.", "Poluição visual.", "Poluição radioativa."], answer: 1 },
+                { question: "O que define o conceito de Cidadania relacionado ao trânsito?", options: ["O direito de dirigir em qualquer velocidade desde que o IPVA esteja pago.", "O conjunto de direitos e deveres que o indivíduo tem para garantir um espaço público seguro e harmonioso.", "A obrigação de comprar apenas carros nacionais.", "Apenas o dever de pagar as multas aplicadas pelos guardas."], answer: 1 },
+                { question: "Lavar o veículo na calçada de vias públicas derramando sabão, óleo e detritos na rede de águas pluviais é:", options: ["Permitido, pois limpa a rua também.", "Uma conduta ecologicamente incorreta que gera poluição hídrica.", "Obrigatório para manter a higiene do bairro.", "Permitido apenas aos finais de semana."], answer: 1 },
+                { question: "Ao passar por uma poça de água na via ao lado de calçadas com pedestres, o motorista cidadão deve:", options: ["Acelerar para limpar os pneus do veículo rapidamente.", "Reduzir a velocidade ou mudar de faixa para evitar arremessar água nas pessoas.", "Buzinar insistentemente para que os pedestres corram.", "Manter a velocidade, pois o pedestre deve tomar cuidado sozinho."], answer: 1 },
+                { question: "O ruído máximo emitido pelo motor e sistema de som dos veículos é regulamentado por qual órgão nacional?", options: ["CONTRAN / CONAMA.", "Prefeitura da cidade apenas.", "Polícia Militar rodoviária apenas.", "ANATEL."], answer: 0 },
+                { question: "Qual das seguintes atitudes ajuda a reduzir o consumo de combustível e a poluição nas cidades?", options: ["Evitar aceleradas bruscas e frenagens violentas, mantendo uma velocidade constante.", "Dirigir o carro sempre esticando as marchas até o limite do motor.", "Manter o carro ligado parado no trânsito por longos períodos.", "Andar sempre com pneus abaixo da calibragem recomendada."], answer: 0 },
+                { question: "Deixar de prestar socorro à vítima de acidente de trânsito, quando solicitado pela autoridade, além de infração e crime, demonstra falta de:", options: ["Dinheiro.", "Conhecimento de mecânica.", "Cidadania e solidariedade humana.", "Habilidade de direção."], answer: 2 },
+                { question: "O chumbo presente no escapamento e em peças antigas de motores pode causar no organismo humano contaminações que afetam principalmente o sistema:", options: ["Digestivo apenas.", "Nervoso e cardiovascular.", "Muscular superior apenas.", "Reprodutor periférico."], answer: 1 },
+                { question: "Vazar combustível (gasolina ou diesel) na pista devido à tampa do tanque frouxa ou defeituosa provoca:", options: ["Apenas desperdício de dinheiro.", "Poluição ambiental do solo e risco gravíssimo de incêndio e derrapagens de motos.", "Aumento da potência do motor do carro de trás.", "Melhor apresentação dos pneus no asfalto."], answer: 1 },
+                { question: "Os gases emitidos pelos motores a diesel contêm partículas finas de fuligem (fumaça preta) que causam doenças graves no sistema:", options: ["Ósseo.", "Respiratório.", "Auditivo.", "Digestivo."], answer: 1 },
+                { question: "O respeito às vagas de estacionamento destinadas a idosos e pessoas com deficiência (PCD) nas ruas e shoppings é:", options: ["Opcional caso você vá demorar menos de 5 minutos.", "Uma obrigação legal estabelecida pelo CTB e uma demonstração de cidadania.", "Válido apenas se o local estiver muito movimentado.", "Permitido para qualquer veículo que ligue o pisca-alerta."], answer: 1 },
+                { question: "A poluição provocada pela queima de pneus velhos a céu aberto libera substâncias químicas cancerígenas na atmosfera conhecidas como:", options: ["Gás Oxigênio puro.", "Dioxinas e furanos.", "Vapor de nitrogênio inofensivo.", "Gás carbônico destilado."], answer: 1 }
+            ],
+            mecanica: [
+                { question: "Qual sistema do veículo é responsável por manter a estabilidade nas curvas?", options: ["Sistema de Suspensão.", "Sistema de Transmissão (Embreagem e Câmbio).", "Sistema de Direção.", "Sistema de Arrefecimento."], answer: 1 },
+                { question: "A função principal do sistema de arrefecimento do motor de um veículo automotor é:", options: ["Aumentar o consumo de óleo lubrificante de forma controlada.", "Controlar e manter a temperatura ideal de trabalho do motor através do líquido de arrefecimento.", "Melhorar a aderência e tração das rodas nas curvas acentuadas.", "Filtrar as impurezas do combustível antes de entrar nos cilindros."], answer: 1 },
+                { question: "Qual o componente elétrico responsável por gerar a faísca (centelha) necessária para explodir a mistura de ar e combustível dentro do motor?", options: ["Alternador.", "Vela de Ignição.", "Bateria de 12v.", "Radiador de alumínio."], answer: 1 },
+                { question: "Se a luz da bateria acender vermelha e fixa no painel de instrumentos com o carro em movimento, isso indica um defeito no:", options: ["Sistema de freios, que está sem fluido.", "Alternador (sistema de carga), indicando que a bateria não está sendo carregada.", "Motor de arranque, que travou rodando.", "Nível de água do limpador de para-brisas."], answer: 1 },
+                { question: "Qual sistema tem a finalidade de reduzir a velocidade do veículo, pará-lo totalmente ou mantê-lo imobilizado quando estacionado?", options: ["Sistema de Transmissão.", "Sistema de Distribuição.", "Sistema de Freios.", "Sistema de Suspensão."], answer: 2 },
+                { question: "O instrumento localizado no painel do veículo que serve para indicar a velocidade instantânea em km/h chama-se:", options: ["Odômetro parcial.", "Velocímetro.", "Tacômetro (Contagiros).", "Manômetro de pressão."], answer: 1 },
+                { question: "Qual peça é responsável por armazenar a energia elétrica sob forma química para alimentar o sistema elétrico quando o motor está desligado?", options: ["Alternador.", "Bobina de ignição.", "Bateria.", "Distribuidor."], answer: 2 },
+                { question: "O desgaste irregular e prematuro no centro da banda de rodagem de um pneu é causado principalmente por:", options: ["Falta de alinhamento e balanceamento das rodas.", "Calibragem incorreta com excesso de pressão (pneu muito cheio).", "Trafegar frequentemente em pistas de terra ou lama.", "Uso prolongado de pneus abaixo da calibragem correta."], answer: 1 },
+                { question: "Qual o componente do sistema de suspensão que trabalha junto com as molas para controlar as oscilações da carroceria e manter o pneu em contato com o solo?", options: ["Amortecedor.", "Barra de direção.", "Pivô de bandeja.", "Cubo de roda."], answer: 0 },
+                { question: "O fluido de freio deve ser verificado periodicamente. Caso o nível esteja baixo sem vazamentos visíveis, isso pode indicar:", options: ["Desgaste natural das pastilhas e lonas de freio.", "Aumento da potência do motor por compressão.", "Excesso de água no radiador do veículo.", "Entupimento no filtro de combustível."], answer: 0 },
+                { question: "O sistema de lubrificação do motor serve para reduzir o atrito entre as peças móveis. O nível do óleo deve ser verificado com o motor:", options: ["Quente e funcionando em marcha lenta.", "Frio e o veículo estacionado em local plano.", "Ligado e acelerando o veículo.", "Em qualquer inclinação de rampa imediatamente após desligar."], answer: 1 },
+                { question: "Qual peça do sistema de exaustão tem o objetivo de reduzir os ruídos estridentes provocados pelas explosões dos gases do motor?", options: ["Catalisador químico.", "Cano coletor de admissão.", "Silenciador (escapamento).", "Sonda lambda."], answer: 2 },
+                { question: "A falta de alinhamento das rodas dianteiras do veículo provoca:", options: ["Aumento da vida útil da embreagem.", "Desgaste irregular e prematuro dos pneus, além de puxar a direção para um dos lados.", "Vazamento de óleo lubrificante no cárter.", "Sobrecarga no alternador de energia."], answer: 1 },
+                { question: "Qual componente responsável por bombear o líquido de arrefecimento e fazê-lo circular pelas galerias internas do motor e pelo radiador?", options: ["Bomba de combustível.", "Bomba de água.", "Bomba de vácuo.", "Bomba de óleo."], answer: 1 },
+                { question: "O que indica o acendimento da luz espia vermelha com o desenho de uma almotolia (lata de óleo) no painel de instrumentos?", options: ["Falta de água no limpador traseiro.", "Baixa pressão ou falta de óleo lubrificante no motor.", "Necessidade de trocar o fluido de freio.", "Temperatura excessiva da água."], answer: 1 },
+                { question: "A função básica do filtro de ar do motor é:", options: ["Reter as impurezas do ar atmosférico antes que ele entre na câmara de combustão.", "Filtrar a fumaça produzida pelo escapamento.", "Purificar o ar condicionado da cabine de passageiros.", "Misturar o combustível com a água de arrefecimento."], answer: 0 },
+                { question: "O sistema de suspensão absorve os impactos da via. Qual peça metálica helicoidal ou em feixes é responsável por sustentar o peso do carro?", options: ["Amortecedor hidráulico.", "Mola.", "Pivô de suspensão.", "Bandeja inferior."], answer: 1 },
+                { question: "Os freios do tipo ABS (Anti-lock Braking System) trazem maior segurança ao motorista porque:", options: ["Permitem parar o carro na metade do tempo sem acionar as luzes traseiras.", "Evitam o travamento das rodas em frenagens de emergência, mantendo a capacidade de esterçar a direção.", "Funcionam de forma mecânica sem usar óleo de freio.", "Bloqueiam as rodas traseiras para o carro derrapar controlado."], answer: 1 },
+                { question: "O componente que realiza a mistura exata de ar e combustível nos veículos mais antigos (antecessor da Injeção Eletrônica) é o:", options: ["Distribuidor elétrico.", "Carburador.", "Radiador.", "Alternador."], answer: 1 },
+                { question: "Qual o nome da peça de borracha que liga o motor às rodas nas articulações, protegendo a junta homocinética contra poeira e terra?", options: ["Coifa protetora.", "Correia dentada.", "Bucha de bandeja.", "Retentor de válvulas."], answer: 0 },
+                { question: "O termostato (ou válvula termostática) localizado no sistema de arrefecimento serve para:", options: ["Medir a quantidade exata de combustível no tanque.", "Bloquear ou liberar a passagem da água para o radiador conforme a temperatura do motor.", "Girar a ventoinha do motor eletricamente.", "Regular a pressão dos freios traseiros."], answer: 1 },
+                { question: "Uma batida forte ou trepidação sentida diretamente no volante de direção ao atingir velocidades mais altas (ex: 80 a 100 km/h) indica falta de:", options: ["Alinhamento da geometria traseira.", "Balanceamento das rodas e pneus dianteiros.", "Óleo lubrificante na caixa de câmbio.", "Pressão no pedal de freio."], answer: 1 },
+                { question: "Qual a função do filtro de combustível no sistema de alimentação?", options: ["Misturar o álcool com a gasolina.", "Reter impurezas sólidas presentes no combustível antes que ele chegue ao sistema de injeção.", "Aumentar a octanagem da gasolina pura.", "Resfriar o combustível que sai do tanque."], answer: 1 },
+                { question: "A fumaça branca densa saindo continuamente pelo escapamento com perda do nível de água do radiador pode indicar:", options: ["Queima normal de etanol em dias quentes.", "Junta do cabeçote do motor queimada, permitindo a entrada de água nos cilindros.", "Uso de gasolina aditivada de alta qualidade.", "Falta de óleo na caixa de marchas."], answer: 1 },
+                { question: "Qual o componente mecânico acionado pelo motorista através de um pedal que desliga a força do motor para a troca de marchas?", options: ["Pedal de freio.", "Embreagem.", "Acelerador eletrônico.", "Eixo cardan."], answer: 1 },
+                { question: "O cárter é uma peça localizada na parte inferior do motor que tem a função de:", options: ["Armazenar o líquido de arrefecimento.", "Servir como reservatório e depósito para o óleo lubrificante do motor.", "Proteger as velas contra umidade externa.", "Filtrar os gases poluentes do escapamento."], answer: 1 },
+                { question: "A correia dentada do motor (correia de distribuição) é uma peça vital. Sua ruptura súbita provoca:", options: ["Apenas o secretário dos faróis do veículo.", "Parada imediata do motor e danos graves e caros nas válvulas e pistões internos.", "Falta de freio nas rodas dianteiras.", "Aceleração máxima descontrolada do carro."], answer: 1 },
+                { question: "O indicador de combustível no painel serve para avisar o motorista sobre:", options: ["A pressão do óleo dentro do motor.", "A quantidade restante de combustível dentro do tanque do veículo.", "A temperatura interna do motor.", "A quilometragem total rodada pelo carro."], answer: 1 },
+                { question: "Trafegar com pneus abaixo da calibragem correta (murchos) gera qual consequência?", options: ["Aumento da estabilidade e economia de combustível.", "Maior desgaste das laterais do pneu, direção pesada e aumento no consumo de combustível.", "Melhora o rendimento do sistema de freios ABS.", "Redução do desgaste do sistema de suspensão."], answer: 1 },
+                { question: "Qual peça é responsável por transferir o movimento giratório do volante até as rodas dianteiras do veículo?", options: ["Eixo de transmissão.", "Caixa e barras de direção.", "Amortecedor central.", "Diferencial."], answer: 1 }
+            ]
+        };
+
+        let currentQuestionsList = [];
+        let indexQuestion = 0;
+        let userScore = 0;
+        let timerInterval;
+        let globalTimeLeft = 40 * 60; // 40 minutos regulamentares do DETRAN em segundos
+        let dynamicAnswered = false;
+        let wrongAnswersList = []; // Armazena erros para revisão
+        let isGeneralMode = false;
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function startQuiz(topic) {
+            document.getElementById("topics-screen").style.display = "none";
+            document.getElementById("quiz-screen").style.display = "block";
+            window.scrollTo({ top: 0, behavior: 'smooth' }); // Garante ir para o topo
+            
+            indexQuestion = 0;
+            userScore = 0;
+            wrongAnswersList = [];
+            
+            if (topic === 'geral') {
+                isGeneralMode = true;
+                document.getElementById("topic-badge").innerText = "Simulado Geral DETRAN";
+                
+                let allQuestions = [];
+                for (let key in bigDatabase) {
+                    if (bigDatabase.hasOwnProperty(key)) {
+                        allQuestions = allQuestions.concat(bigDatabase[key]);
+                    }
+                }
+                shuffleArray(allQuestions);
+                currentQuestionsList = allQuestions.slice(0, 30);
+                globalTimeLeft = 40 * 60; // 40 minutos para a prova toda
+            } else {
+                isGeneralMode = false;
+                let topicName = "Tópico";
+                if(topic === 'legislacao') topicName = "Legislação";
+                if(topic === 'sinalizacao') topicName = "Sinalização";
+                if(topic === 'socorros') topicName = "Primeiros Socorros";
+                if(topic === 'ambiente') topicName = "Meio Ambiente";
+                if(topic === 'mecanica') topicName = "Mecânica Básica";
+                
+                document.getElementById("topic-badge").innerText = topicName;
+                
+                let rawList = [...bigDatabase[topic]];
+                shuffleArray(rawList);
+                currentQuestionsList = rawList.slice(0, 30);
+                globalTimeLeft = currentQuestionsList.length * 45; // 45s por questão se for por categoria
+            }
+
+            clearInterval(timerInterval);
+            updateTimerDisplay();
+            timerInterval = setInterval(updateTimer, 1000);
+
+            loadQuestion();
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(globalTimeLeft / 60);
+            const seconds = globalTimeLeft % 60;
+            const timerCount = document.getElementById("timer-count");
+            const timerBox = document.getElementById("timer-box");
+            
+            timerCount.innerText = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+            
+            if (globalTimeLeft <= 60) {
+                timerBox.classList.add("urgent");
+            } else {
+                timerBox.classList.remove("urgent");
+            }
+        }
+
+        function updateTimer() {
+            globalTimeLeft--;
+            updateTimerDisplay();
+            if (globalTimeLeft <= 0) {
+                clearInterval(timerInterval);
+                timeOutAnswer();
+                showFinalResults();
+            }
+        }
+
+        function loadQuestion() {
+            dynamicAnswered = false;
+            document.getElementById("progress-text").innerText = `Pergunta ${indexQuestion + 1}/${currentQuestionsList.length}`;
+            document.getElementById("feedback-text").innerText = "";
+            document.getElementById("next-btn").style.display = "none";
+
+            const currentQuestion = currentQuestionsList[indexQuestion];
+            document.getElementById("question-text").innerText = currentQuestion.question;
+
+            const plateContainer = document.getElementById("plate-container");
+            const svgHolder = document.getElementById("plate-svg-holder");
+            if (currentQuestion.svgKey && plateSVGs[currentQuestion.svgKey]) {
+                svgHolder.innerHTML = plateSVGs[currentQuestion.svgKey];
+                plateContainer.style.display = "flex";
+            } else {
+                plateContainer.style.display = "none";
+                svgHolder.innerHTML = "";
+            }
+
+            const optionsBox = document.getElementById("options-box");
+            optionsBox.innerHTML = "";
+
+            currentQuestion.options.forEach((option, idx) => {
+                const btn = document.createElement("button");
+                btn.className = "option-item";
+                btn.innerText = option;
+                btn.onclick = () => evaluateOption(idx, btn);
+                optionsBox.appendChild(btn);
+            });
+        }
+
+        function evaluateOption(selectedIdx, selectedElement) {
+            if (dynamicAnswered) return;
+            dynamicAnswered = true;
+
+            const currentQuestion = currentQuestionsList[indexQuestion];
+            const options = document.getElementsByClassName("option-item");
+
+            for (let i = 0; i < options.length; i++) {
+                options[i].classList.add("disabled");
+            }
+
+            if (selectedIdx === currentQuestion.answer) {
+                selectedElement.classList.add("correct");
+                document.getElementById("feedback-text").innerText = "🎯 Resposta Correta!";
+                document.getElementById("feedback-text").style.color = "var(--success)";
+                userScore++;
+            } else {
+                selectedElement.classList.add("wrong");
+                options[currentQuestion.answer].classList.add("correct");
+                document.getElementById("feedback-text").innerText = "❌ Resposta Incorreta!";
+                document.getElementById("feedback-text").style.color = "var(--error)";
+                
+                // Salva o erro para a revisão final
+                wrongAnswersList.push({
+                    question: currentQuestion.question,
+                    correctOption: currentQuestion.options[currentQuestion.answer],
+                    userOption: currentQuestion.options[selectedIdx]
+                });
+            }
+
+            document.getElementById("next-btn").style.display = "block";
+        }
+
+        function timeOutAnswer() {
+            if (dynamicAnswered) return;
+            dynamicAnswered = true;
+            const currentQuestion = currentQuestionsList[indexQuestion];
+            wrongAnswersList.push({
+                question: currentQuestion.question,
+                correctOption: currentQuestion.options[currentQuestion.answer],
+                userOption: "Tempo esgotado sem resposta"
+            });
+        }
+
+        function nextQuestion() {
+            indexQuestion++;
+            if(indexQuestion < currentQuestionsList.length) {
+                loadQuestion();
+            } else {
+                clearInterval(timerInterval);
+                showFinalResults();
+            }
+        }
+
+        function showFinalResults() {
+            document.getElementById("quiz-screen").style.display = "none";
+            document.getElementById("result-screen").style.display = "block";
+            document.getElementById("final-score").innerText = userScore;
+            window.scrollTo({ top: 0, behavior: 'smooth' }); // Sobe para o topo ao terminar
+            
+            const total = currentQuestionsList.length;
+            const percentage = (userScore / total) * 100;
+            const statusText = document.getElementById("result-status");
+            const medalContainer = document.getElementById("medal-container");
+            
+            // Definição de Rankings e Medalhas
+            let medalHTML = "";
+            if (percentage >= 90) {
+                medalHTML = '<div class="medal-badge medal-ouro">🥇 Medalha de Ouro: Gênio do Trânsito</div>';
+            } else if (percentage >= 80) {
+                medalHTML = '<div class="medal-badge medal-prata">🥈 Medalha de Prata: Excelente Desempenho</div>';
+            } else if (percentage >= 70) {
+                medalHTML = '<div class="medal-badge medal-bronze">🥉 Medalha de Bronze: Aprovado!</div>';
+            } else {
+                medalHTML = '<div class="medal-badge medal-reprovado">❌ Condutor em Aprendizado</div>';
+            }
+            medalContainer.innerHTML = medalHTML;
+
+            if(percentage >= 70) {
+                statusText.innerText = `🎉 Parabéns! Você foi APROVADO com ${percentage.toFixed(0)}% de aproveitamento (${userScore} de ${total} acertos).`;
+                statusText.style.color = "var(--success)";
+            } else {
+                statusText.innerText = `❌ REPROVADO. Você obteve ${percentage.toFixed(0)}% de acertos. O mínimo exigido é 70% (21 acertos). Continue praticando!`;
+                statusText.style.color = "var(--error)";
+            }
+
+            // Renderiza Seção de Revisão de Erros se houverem
+            const reviewContainer = document.getElementById("review-container");
+            const reviewList = document.getElementById("review-list");
+            if (wrongAnswersList.length > 0) {
+                reviewContainer.style.display = "block";
+                reviewList.innerHTML = "";
+                wrongAnswersList.forEach(item => {
+                    const div = document.createElement("div");
+                    div.className = "review-item";
+                    div.innerHTML = `
+                        <div class="review-q">${item.question}</div>
+                        <div class="review-a">✓ Correta: ${item.correctOption}</div>
+                        <div class="review-user">✗ Sua Resposta: ${item.userOption}</div>
+                    `;
+                    reviewList.appendChild(div);
+                });
+            } else {
+                reviewContainer.style.display = "none";
+            }
+        }
+
+        function confirmExit() {
+            if (confirm("Tem certeza que deseja interromper o simulado atual e voltar para a tela inicial? Seu progresso será perdido.")) {
+                clearInterval(timerInterval);
+                document.getElementById("quiz-screen").style.display = "none";
+                document.getElementById("topics-screen").style.display = "block";
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        function goToHome() {
+            document.getElementById("result-screen").style.display = "none";
+            document.getElementById("topics-screen").style.display = "block";
+            window.scrollTo({ top: 0, behavior: 'smooth' }); // Retorna para o topo da página principal
+        }
+    </script>
+</body>
+</html>
